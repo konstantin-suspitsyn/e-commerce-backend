@@ -1,0 +1,34 @@
+version: '3.1'
+
+services:
+  ecommercesite:
+    depends_on:
+      - db-ecommerce
+    build:
+      context: .
+    env_file: .env
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+
+  db-ecommerce:
+    image: postgres:14.2-bullseye
+    restart: unless-stopped
+    environment:
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
+      POSTGRES_HOST_AUTH_METHOD: 'scram-sha-256'
+      POSTGRES_DB: 'ecom'
+      # So you don't have to use root, but you can if you like
+      POSTGRES_USER: admin_ec_user
+      # You can use whatever password you like
+      POSTGRES_PASSWORD: admin_ec_password
+    ports:
+      - '5432:5432'
+    expose:
+      - '5432'
+
+  db-ecommerce-mail:
+    image: maildev/maildev
+    restart: unless-stopped
+    ports:
+      - '1080:1080'
+      - '1025:1025'
