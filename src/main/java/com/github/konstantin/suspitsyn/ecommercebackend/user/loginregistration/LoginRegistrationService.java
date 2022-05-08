@@ -1,17 +1,19 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.User;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.UserRole;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.UserService;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.token.ConfirmationToken;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.SneakyThrows;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +26,7 @@ public class LoginRegistrationService {
     public static final String YOU_ARE_OUT = "%s вышел или вышла";
     private final String NON_VALID_EMAIL = "Ваш email не прошел проверку";
     private final String TOKEN_CONFIRMED = "Токен пользователя %s подтвержден";
+    public static final String APPLICATION_JSON = "application/json";
 
     private final EmailValidator emailValidator;
     private final UserService userService;
@@ -31,7 +34,8 @@ public class LoginRegistrationService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-    public String register(RegisterRequest registerRequest) {
+    @SneakyThrows
+    public void register(RegisterRequest registerRequest, HttpServletResponse response) {
         boolean isValidEmail = emailValidator.emailMatcher(registerRequest.getEmail());
 
         if (!isValidEmail) {
@@ -50,7 +54,13 @@ public class LoginRegistrationService {
 
         String token = userService.signUpUser(user);
 
-        return token;
+        Map<String, String> jsonToken = new HashMap<>();
+        jsonToken.put("confirmationToken", token);
+        response.setContentType(APPLICATION_JSON);
+        new ObjectMapper().writeValue(response.getOutputStream(), jsonToken);
+
+        // TODO: send email
+
     }
 
     public String confirmUser(String token) {
@@ -60,28 +70,4 @@ public class LoginRegistrationService {
         return String.format(TOKEN_CONFIRMED, user.getEmail());
     }
 
-    public String login(LoginRequest loginRequest, HttpServletRequest httpServletRequest) {
-        UserDetails user = userService.loadUserByUsername(loginRequest.getEmail());
-
-        if (!user.isEnabled()) {
-            throw new IllegalStateException(NEED_ACTIVATE_ACCOUNT);
-        }
-
-
-        if ((bCryptPasswordEncoder.matches(loginRequest.getPassword(), user.getPassword()))) {
-            HttpSession session = httpServletRequest.getSession();
-            session.setAttribute(USER_NAME, user.getUsername());
-            return SUCCESS_LOGIN;
-        } else {
-            return WRONG_PASSWORD;
-        }
-
-    }
-
-    public String logout(HttpServletRequest httpServletRequest) {
-        HttpSession session = httpServletRequest.getSession();
-        String userName = String.valueOf(session.getAttribute(USER_NAME));
-        session.removeAttribute(USER_NAME);
-        return String.format(YOU_ARE_OUT, userName);
-    }
 }

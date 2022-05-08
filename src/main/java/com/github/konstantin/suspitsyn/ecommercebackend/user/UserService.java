@@ -2,11 +2,17 @@ package com.github.konstantin.suspitsyn.ecommercebackend.user;
 
 import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Service
 @AllArgsConstructor
@@ -22,8 +28,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email).orElseThrow(() ->
+        UserDetails tempUser = userRepository.findByEmail(email).orElseThrow(() ->
                 new UsernameNotFoundException(String.format(USER_NOT_FOUND, email)));
+
+        return new org.springframework.security.core.userdetails
+                .User(tempUser.getUsername(), tempUser.getPassword(), tempUser.getAuthorities());
     }
 
     public String signUpUser(User user) {
@@ -51,4 +60,7 @@ public class UserService implements UserDetailsService {
         userRepository.setEnable(id);
     }
 
+    public Page<User> viewAllUsers() {
+        return new PageImpl<>(userRepository.findAll());
+    }
 }
