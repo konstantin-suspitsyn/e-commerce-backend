@@ -3,4 +3,5 @@ User repository created
 - [x] User repository
 - [x] Login
 - [x] Logout
-- [x] Session authentication
+- [x] JWT authentication
+- [x] User Controller

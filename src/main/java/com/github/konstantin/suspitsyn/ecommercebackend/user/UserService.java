@@ -32,6 +32,7 @@ public class UserService implements UserDetailsService {
     private final String USER_NOT_FOUND = "Пользователь с почтой %s не найден";
     private final String EMAIL_TAKEN = "Пользователь с такой почтой уже существует";
 
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserDetails tempUser = userRepository.findByEmail(email).orElseThrow(() ->
