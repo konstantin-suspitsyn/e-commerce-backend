@@ -31,6 +31,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.authorizeRequests().antMatchers("/registration/**").permitAll();
         http.authorizeRequests().antMatchers("/login").permitAll();
+        http.authorizeRequests().antMatchers("/users/self/**").authenticated();
         http.authorizeRequests().antMatchers("/users/**").hasAnyAuthority(UserRole.ADMIN.name());
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

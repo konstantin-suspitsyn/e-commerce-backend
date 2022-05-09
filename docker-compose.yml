@@ -9,6 +9,8 @@ services:
     env_file: .env
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+    ports:
+      - '8080:8080'
 
   db-ecommerce:
     image: postgres:14.2-bullseye

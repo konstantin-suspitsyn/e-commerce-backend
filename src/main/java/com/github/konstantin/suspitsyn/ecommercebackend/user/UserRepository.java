@@ -26,4 +26,29 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByEmailContaining(@RequestParam("email") String email, Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u " +
+            "SET u.firstName = ?1 " +
+            ",u.lastName = ?2 " +
+            ",u.password = ?3 " +
+            ",u.userRole = ?4 " +
+            "WHERE u.id = ?5")
+    void updateUserData(String firstName, String lastName, String password,
+                        String userRole, Long id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u " +
+            "SET u.password = ?2 " +
+            "WHERE u.id = ?1")
+    void updatePassword(Long id, String password);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u " +
+            "SET u.userRole = ?2 " +
+            "WHERE u.email = ?1")
+    void makeUserAdmin(String username, UserRole role);
+
 }

@@ -1,41 +1,46 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.github.konstantin.suspitsyn.ecommercebackend.configuration.CustomAlgorithm;
+import com.github.konstantin.suspitsyn.ecommercebackend.services.StaticServices;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.User;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.UserRole;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.UserService;
+import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.filter.AuthenticationToken;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.token.ConfirmationToken;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @Service
 @AllArgsConstructor
 public class LoginRegistrationService {
 
-    public static final String NEED_ACTIVATE_ACCOUNT = "Нужно активировать аккаунт";
-    public static final String SUCCESS_LOGIN = "Пользователь успешно вошел";
-    public static final String WRONG_PASSWORD = "Пароль неверный";
-    public static final String USER_NAME = "userName";
-    public static final String YOU_ARE_OUT = "%s вышел или вышла";
     private final String NON_VALID_EMAIL = "Ваш email не прошел проверку";
     private final String TOKEN_CONFIRMED = "Токен пользователя %s подтвержден";
-    public static final String APPLICATION_JSON = "application/json";
+    // Bearer authentication (also called token authentication)
+    public static final String BEARER_ = "Bearer ";
 
     private final EmailValidator emailValidator;
     private final UserService userService;
     private final ConfirmationTokenService confirmationTokenService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-    @SneakyThrows
-    public void register(RegisterRequest registerRequest, HttpServletResponse response) {
+    public void register(RegisterRequest registerRequest, HttpServletResponse response) throws IOException {
         boolean isValidEmail = emailValidator.emailMatcher(registerRequest.getEmail());
 
         if (!isValidEmail) {
@@ -56,8 +61,7 @@ public class LoginRegistrationService {
 
         Map<String, String> jsonToken = new HashMap<>();
         jsonToken.put("confirmationToken", token);
-        response.setContentType(APPLICATION_JSON);
-        new ObjectMapper().writeValue(response.getOutputStream(), jsonToken);
+        StaticServices.mapResponse(response, jsonToken);
 
         // TODO: send email
 
@@ -69,5 +73,39 @@ public class LoginRegistrationService {
         userService.enableUser(user.getId());
         return String.format(TOKEN_CONFIRMED, user.getEmail());
     }
+
+    public void refreshToken(HttpServletRequest request, HttpServletResponse httpServletResponse) throws IOException {
+        String authorizationHeader = request.getHeader(AUTHORIZATION);
+
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_)) {
+            try {
+                // RefreshToken Check
+                String refreshToken = authorizationHeader.substring(BEARER_.length());
+                Algorithm algorithm = CustomAlgorithm.encryptionAlgorithm();
+                JWTVerifier jwtVerifier = JWT.require(algorithm).build();
+                DecodedJWT decodedJWT = jwtVerifier.verify(refreshToken);
+                String username = decodedJWT.getSubject();
+                org.springframework.security.core.userdetails.User user =
+                        (org.springframework.security.core.userdetails.User)
+                                userService.loadUserByUsername(username);
+                // Creating new accessToken
+                AuthenticationToken authenticationToken = new AuthenticationToken();
+                String accessToken = authenticationToken.authenticationToken(user, request.getRequestURL().toString(), 24*60);
+                Map<String, String> tokens = new HashMap<>();
+                tokens.put("accessToken", accessToken);
+                StaticServices.mapResponse(httpServletResponse, tokens);
+            } catch (Exception exception) {
+                httpServletResponse.setHeader("error", exception.getMessage());
+                httpServletResponse.setStatus(FORBIDDEN.value());
+                Map<String, String> error = new HashMap<>();
+                error.put("error_message", exception.getMessage());
+                StaticServices.mapResponse(httpServletResponse, error);;
+
+            }
+        } else {
+            throw new RuntimeException("Refresh token отсутствет");
+        }
+    }
+
 
 }
