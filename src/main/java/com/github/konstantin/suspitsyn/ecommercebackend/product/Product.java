@@ -27,7 +27,7 @@ public class Product {
     private String description;
 
     @Column(name = "unit_price")
-    private BigDecimal unitPrice;
+    private Long unitPrice;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -36,10 +36,10 @@ public class Product {
     private Boolean active;
 
     @Column(name = "units_in_active_stock")
-    private int unitsInActiveStock;
+    private Long unitsInActiveStock;
 
     @Column(name = "units_in_stock")
-    private int unitsInReserve;
+    private Long unitsInReserve;
 
     @Column(name = "date_created")
     @CreationTimestamp

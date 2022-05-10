@@ -25,13 +25,13 @@ public class ProductCategoryController {
     }
 
     @PostMapping("/create")
-    public ProductCategory createProductCategory(@RequestParam String name, HttpServletRequest request, HttpServletResponse response) {
-        return productCategoryService.createProductCategory(name, request, response);
+    public ProductCategory createProductCategory(@RequestParam String name) {
+        return productCategoryService.createProductCategory(name);
     }
 
     @PostMapping("/update")
-    public void updateProductCategory(@RequestParam String name, @RequestParam Long id, HttpServletRequest request, HttpServletResponse response) {
-        productCategoryService.updateProductCategory(name, id, request, response);
+    public void updateProductCategory(@RequestParam String name, @RequestParam Long id) {
+        productCategoryService.updateProductCategory(name, id);
     }
 
     @DeleteMapping("/delete")

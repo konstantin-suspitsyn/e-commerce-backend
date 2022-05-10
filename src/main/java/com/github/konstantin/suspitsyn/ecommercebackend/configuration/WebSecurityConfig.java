@@ -7,6 +7,7 @@ import com.github.konstantin.suspitsyn.ecommercebackend.user.loginregistration.f
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,6 +34,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/login").permitAll();
         http.authorizeRequests().antMatchers("/users/self/**").authenticated();
         http.authorizeRequests().antMatchers("/users/**").hasAnyAuthority(UserRole.ADMIN.name());
+        http.authorizeRequests().antMatchers(HttpMethod.DELETE,"/product-categories/**").hasAnyAuthority(UserRole.ADMIN.name());
+        http.authorizeRequests().antMatchers(HttpMethod.POST,"/product-categories/**").hasAnyAuthority(UserRole.ADMIN.name());
+        http.authorizeRequests().antMatchers(HttpMethod.PUT,"/product-categories/**").hasAnyAuthority(UserRole.ADMIN.name());
         http.authorizeRequests().anyRequest().permitAll();
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 

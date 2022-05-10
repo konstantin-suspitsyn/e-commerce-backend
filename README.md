@@ -77,3 +77,17 @@ http://localhost:8080/users/make-admin?username=<почта пользовате
 Нужно быть админом<br>
 http://localhost:8080/users/all
 
+## Product Category API
+1. Просмотр продуктовых категорий (GET)<br>
+   http://localhost:8080/product-categories/all
+2. Просмотр одной категории (GET)<br>
+   http://localhost:8080/product-categories/get?id=<id>
+3. Создание новой категории (POST)<br>
+   Должен быть админом<br>
+   http://localhost:8080/product-categories/create?name=<name>
+4. Обновление названия категории (POST)<br>
+   Должен быть админом<br>
+   http://localhost:8080/product-categories/update?name=<name>&id=<id>
+5. Удаление категории (DELETE)<br>
+   Должен быть админом<br>
+   http://localhost:8080/product-categories/delete?id=<id>

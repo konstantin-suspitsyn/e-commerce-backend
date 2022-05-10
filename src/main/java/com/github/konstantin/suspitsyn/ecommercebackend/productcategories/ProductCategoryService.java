@@ -24,16 +24,14 @@ public class ProductCategoryService {
     }
 
 
-    public ProductCategory createProductCategory(String name, HttpServletRequest request, HttpServletResponse response) {
+    public ProductCategory createProductCategory(String name) {
         ProductCategory productCategory = new ProductCategory(name);
         productCategoryRepository.save(productCategory);
         return productCategory;
     }
 
     public void updateProductCategory(String name,
-                                                 Long id,
-                                                 HttpServletRequest request,
-                                                 HttpServletResponse response) {
+                                                 Long id) {
         if (!productCategoryRepository.findById(id).isPresent()) {
             throw new IllegalStateException(CATEGORY_NOT_FOUND);
         }
