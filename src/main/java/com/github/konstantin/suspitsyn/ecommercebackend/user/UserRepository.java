@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.Optional;
 
 @Repository

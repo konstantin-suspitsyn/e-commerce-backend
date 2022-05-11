@@ -10,7 +10,7 @@ create table if not exists product (
     ,sku varchar(255)
     ,unit_price int8
     ,units_in_active_stock int8
-    ,units_in_stock int8
+    ,units_in_reserved_stock int8
     ,category_id int8 not null
     ,primary key (id)
     ,CONSTRAINT fk_category

@@ -1,23 +1,26 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.product;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.github.konstantin.suspitsyn.ecommercebackend.productcategories.ProductCategory;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "product")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "sku")
+    @Column(name = "sku", unique=true)
     private String sku;
 
     @Column(name = "short_name")
@@ -38,18 +41,33 @@ public class Product {
     @Column(name = "units_in_active_stock")
     private Long unitsInActiveStock;
 
-    @Column(name = "units_in_stock")
+    @Column(name = "units_in_reserved_stock")
     private Long unitsInReserve;
 
     @Column(name = "date_created")
     @CreationTimestamp
-    private Date dateCreated;
+    private LocalDate dateCreated;
 
     @Column(name = "last_updated")
     @UpdateTimestamp
-    private Date lastUpdated;
+    private LocalDate lastUpdated;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "category_id", nullable = false)
     private ProductCategory category;
+
+    public Product(String sku, String shortName, String description, Long unitPrice, String imageUrl, Boolean active, Long unitsInActiveStock, Long unitsInReserve, LocalDate dateCreated, LocalDate lastUpdated, ProductCategory category) {
+        this.sku = sku;
+        this.shortName = shortName;
+        this.description = description;
+        this.unitPrice = unitPrice;
+        this.imageUrl = imageUrl;
+        this.active = active;
+        this.unitsInActiveStock = unitsInActiveStock;
+        this.unitsInReserve = unitsInReserve;
+        this.dateCreated = dateCreated;
+        this.lastUpdated = lastUpdated;
+        this.category = category;
+    }
 }

@@ -41,4 +41,8 @@ public class ProductCategoryService {
     public void deleteProductCategory(Long id) {
         productCategoryRepository.deleteById(id);
     }
+
+    public boolean categoryPresent(Long id) {
+        return productCategoryRepository.findById(id).isPresent();
+    }
 }
