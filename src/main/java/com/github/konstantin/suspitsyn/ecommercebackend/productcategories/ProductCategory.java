@@ -1,5 +1,6 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.productcategories;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.github.konstantin.suspitsyn.ecommercebackend.product.Product;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class ProductCategory {
 
     private String name;
 
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
     private Set<Product> products;
 

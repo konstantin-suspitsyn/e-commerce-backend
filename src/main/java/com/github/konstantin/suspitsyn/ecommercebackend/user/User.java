@@ -24,12 +24,14 @@ public class User implements UserDetails {
     private Long id;
     private String firstName;
     private String lastName;
+    @Column(unique=true)
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
     private Boolean locked;
     private Boolean enabled;
+
 
     public User(String firstName,
                 String lastName,
