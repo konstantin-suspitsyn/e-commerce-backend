@@ -19,7 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "from Product p")
     Page<Product> getAll(Pageable pageable);
 
-    Page<Product> findByShortNameContaining(@RequestParam("shortName") String shortName, Pageable pageable);
+    Page<Product> findByShortNameContainingIgnoreCase(@RequestParam("shortName") String shortName, Pageable pageable);
 
     @Query("SELECT p " +
             "from Product p " +
@@ -59,5 +59,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "SET p.active = ?1 " +
             "WHERE p.id = ?2 ")
     void changeActive(boolean active, Long id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Product p " +
+            "SET p.unitsInActiveStock = ?1 " +
+            ", p.unitsInReserve = ?2 " +
+            "WHERE p.id = ?3 ")
+    void updatePcs(Long activeStock, Long reservedStock, Long id);
 
 }

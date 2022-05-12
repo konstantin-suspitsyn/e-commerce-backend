@@ -51,7 +51,8 @@ password: password
 6. Просмотр информации о себе
    http://localhost:8080/users/self <br>
 Ответ:
-```{
+```
+{
     "firstName": "firstName",
     "lastName": "lastName",
     "userRole": "USER",
@@ -91,3 +92,24 @@ http://localhost:8080/users/all
 5. Удаление категории (DELETE)<br>
    Должен быть админом<br>
    http://localhost:8080/product-categories/delete?id=<id>
+
+## Product API
+1. Просмотр товаров<br>
+http://localhost:8080/products (GET)
+2. Поиск товаров<br>
+   http://localhost:8080/products/search?searchName=<name> (GET)
+3. Создание товара
+http://localhost:8080/products/create
+```
+{
+    "sku": "123123",
+    "shortName": "test",
+    "description": "test",
+    "unitPrice": 123500,
+    "imageUrl": "tets.jpg",
+    "active": true,
+    "unitsInActiveStock": 5,
+    "unitsInReserve": 0,
+    "category": 1
+}
+```

@@ -1,5 +1,6 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.user;
 
+import com.github.konstantin.suspitsyn.ecommercebackend.order.Order;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
@@ -31,6 +33,8 @@ public class User implements UserDetails {
     private UserRole userRole;
     private Boolean locked;
     private Boolean enabled;
+    @OneToMany(mappedBy = "user")
+    private List<Order> orderList;
 
 
     public User(String firstName,
