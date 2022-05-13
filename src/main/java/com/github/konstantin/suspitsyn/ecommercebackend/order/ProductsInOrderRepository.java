@@ -33,4 +33,5 @@ public interface ProductsInOrderRepository extends JpaRepository<ProductsInOrder
             "FROM ProductsInOrder pio " +
             "WHERE pio.order = ?1")
     List<ProductsInOrder> getProductsWhereOrder(Order order);
+
 }

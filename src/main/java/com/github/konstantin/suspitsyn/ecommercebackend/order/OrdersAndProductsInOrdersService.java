@@ -28,13 +28,14 @@ public class OrdersAndProductsInOrdersService {
     public static final String INACTIVE_GOODS = "Товар заказать нельзя. Он неактивный";
     public static final String SHORTAGE = "Товар на складе закончился";
     public static final String ORDER_CANCELLED_ALREADY = "Заказ был уже удолен";
-    private final ProductsInOrderRepository productsInOrderRepository;
     private final UserService userService;
     private final ProductService productService;
     public static final int EXPIRED_DAYS_TO_ADD = 10;
-    private final OrderRepository orderRepository;
 
     private final String UNKNOWN_USER = "anonymousUser";
+
+    private final ProductInOrdersService productInOrdersService;
+    private final OrderService orderService;
 
     // Orders
 
@@ -46,13 +47,7 @@ public class OrdersAndProductsInOrdersService {
         User user;
         OrderStatus orderStatus = OrderStatus.CREATE;
 
-        // If user is not logged in
-        if (usernameAndSession.get("username") == UNKNOWN_USER) {
-            user = null;
-        } else {
-            username = usernameAndSession.get("username");
-            user = userService.findByEmail(username);
-        }
+        user = userService.returnUser(usernameAndSession);
 
         cookieCartId = usernameAndSession.get(COOKIE_CART_ID_NAME);
 
@@ -60,12 +55,86 @@ public class OrdersAndProductsInOrdersService {
 
         // If order was created by session without login
         if (order.getUser() == null && user != null) {
-            this.updateUser(user, order.getId());
+            orderService.updateUser(user, order.getId());
         }
-
         return order;
     }
 
+
+
+    public void updateCancelOrderAnd (Order order) {
+
+        this.cancelOrder(order.getId());
+
+        List<ProductsInOrder> productsInOrderList = productInOrdersService.getAllByOrder(order);
+
+        for(ProductsInOrder tempPIO: productsInOrderList) {
+            Product product = tempPIO.getProduct();
+            productService.updatePcs(
+                    product.getUnitsInActiveStock() + tempPIO.getOrderQuantity(),
+                    product.getUnitsInReserve() - tempPIO.getOrderQuantity(),
+                    product.getId()
+            );
+        }
+    }
+
+    public Order findOrderByUserOrSessionAndStatus(String cookie, User user, OrderStatus orderStatus) {
+
+        List<Order> presentedOrders = orderService.findOrderByUserOrCookieAndStatus(cookie, user, orderStatus);
+
+        if (presentedOrders.isEmpty()) {
+            // Creating new order
+            Order newOrder = new Order(
+                    user,
+                    cookie,
+                    0L,
+                    0L,
+                    OrderStatus.CREATE,
+                    LocalDateTime.now(),
+                    LocalDate.now().plusDays(EXPIRED_DAYS_TO_ADD),
+                    null
+            );
+
+            orderService.save(newOrder);
+
+            return newOrder;
+        }
+
+        if (presentedOrders.size() > 1) {
+            for (int i = 1; i < presentedOrders.size(); i++) {
+                this.cancelOrder(presentedOrders.get(i).getId());
+            }
+        }
+
+        return presentedOrders.get(0);
+    }
+
+
+    public void cancelOrder(Long orderId) {
+        OrderStatus cancelledStatus = OrderStatus.CANCELED;
+
+        Order order = orderService.getById(orderId);
+
+        if (order.getOrderStatus() == cancelledStatus) {
+            throw new IllegalStateException(ORDER_CANCELLED_ALREADY);
+        }
+
+        orderService.updateStatus(cancelledStatus, orderId);
+
+
+        List<ProductsInOrder> productsInOrderList = productInOrdersService.getAllByOrder(order);
+
+        for(ProductsInOrder tempPIO: productsInOrderList) {
+            Product product = tempPIO.getProduct();
+            productService.updatePcs(
+                    product.getUnitsInActiveStock() + tempPIO.getOrderQuantity(),
+                    product.getUnitsInReserve() - tempPIO.getOrderQuantity(),
+                    product.getId()
+            );
+        }
+    }
+
+    // Products In Order
     public void addProductToOrder(ProductInOrderRequest productInOrderRequest,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
@@ -93,7 +162,7 @@ public class OrdersAndProductsInOrdersService {
                 productToAdd.getId()
         );
 
-        ProductsInOrder productInOrder = productsInOrderRepository
+        ProductsInOrder productInOrder = productInOrdersService
                 .getProductInOrder(order, productToAdd);
 
         if (productInOrder == null) {
@@ -104,9 +173,9 @@ public class OrdersAndProductsInOrdersService {
                     productInOrderRequest.getPrice()
             );
             // Add product to Order
-            productsInOrderRepository.save(productsInOrder);
+            productInOrdersService.save(productsInOrder);
         } else {
-            this.updateQuantityAndPrice(
+            productInOrdersService.updateQuantityAndPrice(
                     productInOrderRequest.getQuantity() + productInOrder.getOrderQuantity(),
                     productInOrderRequest.getPrice(),
                     productInOrder.getId()
@@ -114,7 +183,7 @@ public class OrdersAndProductsInOrdersService {
         }
 
         // Update update Order datetime
-        this.updateUpdateDate(order.getId());
+        orderService.updateUpdateDate(order.getId());
 
         // Update quantity and Rub in Order
         Long sumRum = order.getTotalPrice();
@@ -123,106 +192,55 @@ public class OrdersAndProductsInOrdersService {
         sumRum = sumRum + productInOrderRequest.getPrice() * productInOrderRequest.getQuantity();
         sumUnits = sumUnits + productInOrderRequest.getQuantity();
 
-        this.updateSums(sumUnits, sumRum, order.getId());
+        orderService.updateSums(sumUnits, sumRum, order.getId());
 
     }
 
-    public void updateQuantityAndPrice(Long quantity, Long price, Long id) {
-        productsInOrderRepository.updateQuantityAndPrice(quantity, price, id);
-    }
+    public void decreaseProductAmount(HttpServletRequest request, HttpServletResponse response,
+                                      Long productId, Long decreaseAmount) {
 
-    public List<ProductsInOrder> getAllByOrder(Order order) {
-        return productsInOrderRepository.getProductsWhereOrder(order);
-    }
+        Order order = this.createOrFindOrder(request, response);
+        Product product = productService.findById(productId);
 
-    public void updateCancelOrderAnd (Order order) {
+        ProductsInOrder PIO = productInOrdersService.getProductInOrder(order, product);
 
-        this.cancelOrder(order.getId());
+        Long decreaseAmountFinal = Math.min(PIO.getOrderQuantity(), decreaseAmount);
+        Long price = PIO.getPrice();
 
-        List<ProductsInOrder> productsInOrderList = this.getAllByOrder(order);
-
-        for(ProductsInOrder tempPIO: productsInOrderList) {
-            Product product = tempPIO.getProduct();
-            productService.updatePcs(
-                    product.getUnitsInActiveStock() + tempPIO.getOrderQuantity(),
-                    product.getUnitsInReserve() - tempPIO.getOrderQuantity(),
-                    product.getId()
-            );
-        }
-    }
-
-    public Order findOrderByUserOrSessionAndStatus(String cookie, User user, OrderStatus orderStatus) {
-
-        List<Order> presentedOrders = orderRepository.findOrderByUserOrSessionAndStatus(cookie, user, orderStatus);
-
-        if (presentedOrders.isEmpty()) {
-            // Creating new order
-            Order newOrder = new Order(
-                    user,
-                    cookie,
-                    0L,
-                    0L,
-                    OrderStatus.CREATE,
-                    LocalDateTime.now(),
-                    LocalDate.now().plusDays(EXPIRED_DAYS_TO_ADD),
-                    null
-            );
-
-            orderRepository.save(newOrder);
-
-            return newOrder;
+        if (decreaseAmountFinal == PIO.getOrderQuantity()) {
+            productInOrdersService.deleteProductInOrder(PIO);
         }
 
-        if (presentedOrders.size() > 1) {
-            for (int i = 1; i < presentedOrders.size(); i++) {
-                this.cancelOrder(presentedOrders.get(i).getId());
-            }
-        }
+        this.changeTotalQuantityInOrder(order, -decreaseAmountFinal, price);
 
-        return presentedOrders.get(0);
-    }
-
-    public void updateUpdateDate(Long id) {
-        orderRepository.updateUpdateDate(LocalDateTime.now(), id);
-    }
-
-    public void updateSums(Long units, Long rub, Long id) {
-        // It doesn't add or subtract, you should do it on your own
-        orderRepository.updateSumsInOrder(units, rub, id);
-    }
-
-    public void updateUser(User user, Long id) {
-        orderRepository.updateUser(user, id);
-    }
-
-    public List<ProductsInOrder> getProductsInOrder(Long id) {
-        return orderRepository.getProductsInOrder(id);
-    }
-
-    public void cancelOrder(Long orderId) {
-        OrderStatus cancelledStatus = OrderStatus.CANCELED;
-
-        Order order = orderRepository.getById(orderId);
-
-        if (order.getOrderStatus() == cancelledStatus) {
-            throw new IllegalStateException(ORDER_CANCELLED_ALREADY);
-        }
-
-        orderRepository.updateStatus(cancelledStatus, orderId);
-
-
-        List<ProductsInOrder> productsInOrderList = this.getAllByOrder(order);
-
-        for(ProductsInOrder tempPIO: productsInOrderList) {
-            Product product = tempPIO.getProduct();
-            productService.updatePcs(
-                    product.getUnitsInActiveStock() + tempPIO.getOrderQuantity(),
-                    product.getUnitsInReserve() - tempPIO.getOrderQuantity(),
-                    product.getId()
-            );
+        order = this.createOrFindOrder(request, response);
+        if (order.getTotalItems() == 0) {
+            this.cancelOrder(order.getId());
         }
 
     }
+
+    public void deleteProductInOrder(HttpServletRequest request, HttpServletResponse response,
+                                     Long productId) {
+        Order order = this.createOrFindOrder(request, response);
+        Product product = productService.findById(productId);
+
+        ProductsInOrder PIO = productInOrdersService.getProductInOrder(order, product);
+
+        this.decreaseProductAmount(request, response, productId, -1 * PIO.getOrderQuantity());
+
+
+    }
+
+    private void changeTotalQuantityInOrder(Order order, Long amount, Long price) {
+        // IMPORTANT
+        // If amount > 0, then increase of quantity, else decrease
+
+        orderService.updateSums(order.getTotalItems() + amount,
+                order.getTotalPrice() + price * amount,
+                order.getId());
+    }
+
 
     // HELPER METHODS
     private Map<String, String> createSessionIfNoSessionOrUsername(HttpServletRequest request, HttpServletResponse response) {

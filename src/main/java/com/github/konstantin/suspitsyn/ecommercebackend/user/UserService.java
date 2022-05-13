@@ -32,6 +32,8 @@ public class UserService implements UserDetailsService {
     private final String USER_NOT_FOUND = "Пользователь с почтой %s не найден";
     private final String EMAIL_TAKEN = "Пользователь с такой почтой уже существует";
 
+    private final String UNKNOWN_USER = "anonymousUser";
+
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -112,4 +114,22 @@ public class UserService implements UserDetailsService {
         userRepository.makeUserAdmin(username, UserRole.ADMIN);
         response.setStatus(200);
     }
+
+    public User returnUser(Map<String, String> usernameAndSession) {
+
+        String username;
+        User user;
+
+        // If user is not logged in
+        if (usernameAndSession.get("username") == UNKNOWN_USER) {
+            user = null;
+        } else {
+            username = usernameAndSession.get("username");
+            user = this.findByEmail(username);
+        }
+
+        return user;
+    }
+
+
 }

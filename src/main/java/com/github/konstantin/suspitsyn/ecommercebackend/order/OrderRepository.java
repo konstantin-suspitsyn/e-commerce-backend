@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -19,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE (o.user = ?2 OR o.session = ?1) " +
             "AND o.orderStatus = ?3 " +
             "ORDER BY o.id desc")
-    List<Order> findOrderByUserOrSessionAndStatus(String session, User user, OrderStatus orderStatus);
+    List<Order> findOrderByUserOrCookieAndStatus(String session, User user, OrderStatus orderStatus);
 
     @Query("SELECT o " +
             "from Order o " +
