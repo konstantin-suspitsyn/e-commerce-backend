@@ -18,7 +18,7 @@ public interface ProductsInOrderRepository extends JpaRepository<ProductsInOrder
             "AND pio.product = ?2")
     ProductsInOrder getProductInOrder(Order order, Product product);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE ProductsInOrder pio " +
             "SET pio.orderQuantity = ?1 " +

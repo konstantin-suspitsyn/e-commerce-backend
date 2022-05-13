@@ -26,7 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "WHERE p.category = ?1 ")
     Page<Product> getWhereCategory(ProductCategory productCategory, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Product p " +
             "SET p.unitsInActiveStock = ?1 " +
@@ -34,7 +34,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "WHERE p.id = ?3 ")
     void updateQuantity(Long activeQuantity, Long reservedQuantity, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Product p " +
             "SET p.sku = ?1 " +
@@ -46,21 +46,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     void updateData(String sku, String shortName, String description,
                     String imageUrl, LocalDate lastUpdated, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Product p " +
             "SET p.unitPrice = ?1 " +
             "WHERE p.id = ?2 ")
     void updatePrice(Long unitPrice, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Product p " +
             "SET p.active = ?1 " +
             "WHERE p.id = ?2 ")
     void changeActive(boolean active, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Product p " +
             "SET p.unitsInActiveStock = ?1 " +

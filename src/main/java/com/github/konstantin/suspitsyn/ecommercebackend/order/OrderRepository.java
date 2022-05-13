@@ -25,21 +25,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.user = ?1")
     List<Order> findOrderByUser(User user);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Order o " +
             "SET o.orderStatus = ?1 " +
             "WHERE o.id = ?2")
     void updateStatus(OrderStatus orderStatus, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Order o " +
             "SET o.updateDate = ?1 " +
             "WHERE o.id = ?2")
     void updateUpdateDate(LocalDateTime localDatetime, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Order o " +
             "SET o.totalItems = ?1 " +
@@ -47,14 +47,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.id = ?3")
     void updateSumsInOrder(Long units, Long rub, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query(("UPDATE Order o " +
             "SET o.user = ?1 " +
             "WHERE o.id = ?2"))
     void updateUser(User user, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("SELECT o.productsInOrderList " +
             "FROM Order o " +

@@ -36,8 +36,6 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        productCategoryRepository.deleteAll();
-        productRepository.deleteAll();
         productCategory = new ProductCategory(CUSTOM_CATEGORY);
         productCategoryRepository.save(productCategory);
         newProduct = new Product(

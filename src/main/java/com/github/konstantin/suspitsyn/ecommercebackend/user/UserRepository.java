@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findById(Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE User u " +
             "SET u.enabled = true " +
@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByEmailContaining(@RequestParam("email") String email, Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE User u " +
             "SET u.firstName = ?1 " +
@@ -38,14 +38,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     void updateUserData(String firstName, String lastName, String password,
                         String userRole, Long id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE User u " +
             "SET u.password = ?2 " +
             "WHERE u.id = ?1")
     void updatePassword(Long id, String password);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE User u " +
             "SET u.userRole = ?2 " +
