@@ -64,8 +64,8 @@ password: password
    В POST надо передать JSON:<br>
 ```
 {
-"oldPassword": "password",
-"newPassword": "password1"
+   "oldPassword": "password",
+   "newPassword": "password1"
 }
 ```
 8. Сделать пользователя админом
@@ -95,11 +95,17 @@ http://localhost:8080/users/all
 
 ## Product API
 1. Просмотр товаров<br>
-http://localhost:8080/products (GET)
-2. Поиск товаров<br>
+http://localhost:8080/products (GET)<br>
+Опционально можно передать параметры pageNo perPage<br> http://localhost:8080/products?pageNo=<номер_страницы>&perPage=<кол-во_элемнтов_на_странице> (GET)
+2. Просмотр одного товара<br>
+   http://localhost:8080/products/one?id=<id_товара> (GET)<br>
+3. Поиск товаров<br>
    http://localhost:8080/products/search?searchName=<name> (GET)
-3. Создание товара
-http://localhost:8080/products/create
+4. Фильтр по категории<br>
+   http://localhost:8080/products/category?categoryId=<номер_категории> (GET)<br>
+   Опционально можно передать параметры pageNo perPage <br>http://localhost:8080/products/category?categoryId=<номер_категории>&pageNo=<номер_страницы>&perPage=<кол-во_элемнтов_на_странице> (GET)
+5. Создание товара<br>
+http://localhost:8080/products/create (POST)<br>Должен быть админом<br>
 ```
 {
     "sku": "123123",
@@ -113,3 +119,17 @@ http://localhost:8080/products/create
     "category": 1
 }
 ```
+4. Удаление товара<br>http://localhost:8080/products/delete?id=<id_товара> (DELETE)<br>Должен быть админом<br>
+5. Обновлнение мастер-данных товара<br>
+   http://localhost:8080/products/update-data (POST)<br>Должен быть админом<br>
+```
+{   
+    "id": <id_товара>,
+    "sku": "testSKUUpd",
+    "shortName": "testUpd",
+    "description": "testUpd",
+    "imageUrl": "tets_.jpg"
+}
+```
+6. Обновление цены<br>
+   http://localhost:8080/products/update-price?id=<id_товара>&price=<новая_цена> (POST)<br>Должен быть админом<br>

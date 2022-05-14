@@ -87,4 +87,16 @@ public class ProductService {
         productRepository.updatePcs(activeStock, reservedStock, id);
     }
 
+    public void updateData(ProductUpdateDataRequest productUpdateDataRequest) {
+        productRepository.updateData(productUpdateDataRequest.getSku(),
+                productUpdateDataRequest.getShortName(),
+                productUpdateDataRequest.getDescription(),
+                productUpdateDataRequest.getImageUrl(),
+                LocalDate.now(),
+                productUpdateDataRequest.getId());
+    }
+
+    public void updatePrice(Long id, Long price) {
+        productRepository.updatePrice(price, id);
+    }
 }

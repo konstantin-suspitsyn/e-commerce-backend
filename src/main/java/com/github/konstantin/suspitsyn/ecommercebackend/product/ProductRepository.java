@@ -41,7 +41,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             ", p.shortName = ?2" +
             ", p.description = ?3" +
             ", p.imageUrl = ?4" +
-            ", p.lastUpdated = ?5" +
+            ", p.lastUpdated = ?5 " +
             "WHERE p.id = ?6 ")
     void updateData(String sku, String shortName, String description,
                     String imageUrl, LocalDate lastUpdated, Long id);

@@ -8,12 +8,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
+@Transactional
 @DisplayName("Product Repository Test")
 class ProductRepositoryTest {
 
@@ -26,6 +31,7 @@ class ProductRepositoryTest {
     public static final boolean BOOLEAN_ACTIVE = true;
     public static final long IN_STOCK = 100L;
     public static final long IN_RESERVE = 0L;
+    public static final String SUPER_NEW_SKU = "SUPER_NEW_SKU";
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -55,35 +61,60 @@ class ProductRepositoryTest {
 
     @AfterEach
     void tearDown() {
-        productCategoryRepository.deleteAll();
         productRepository.deleteAll();
+        productCategoryRepository.deleteAll();
     }
 
     @Test
-    void getAll() {
+    void shouldGetAll() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Product> productPage = productRepository.getAll(pageable);
+        assertThat(productPage.getTotalElements()).isGreaterThan(0L);
     }
 
     @Test
-    void findByShortNameContaining() {
+    void shouldFindByShortNameContaining() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Product> productPage = productRepository.findByShortNameContainingIgnoreCase("паук", pageable);
+        assertThat(productPage.getTotalElements()).isGreaterThan(1L);
     }
 
     @Test
-    void getWhereCategory() {
+    void shouldGetWhereCategory() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Product> productPage = productRepository.getWhereCategory(productCategory, pageable);
+        assertThat(productPage.getTotalElements()).isEqualTo(1);
     }
 
     @Test
-    void updateQuantity() {
+    void shouldUpdateQuantity() {
+        productRepository.updatePcs(0L, 100L, newProduct.getId());
+        Product product = productRepository.getById(newProduct.getId());
+        assertThat(product.getUnitsInActiveStock()).isEqualTo(0);
+        assertThat(product.getUnitsInReserve()).isEqualTo(100);
     }
 
     @Test
-    void updateData() {
+    void shouldUpdateData() {
+        productRepository.updateData(SUPER_NEW_SKU, SHORT_NAME,
+                DESCRIPTION,
+                IMAGE_URL, LocalDate.now(), newProduct.getId());
+
+        Product product = productRepository.getById(newProduct.getId());
+        assertThat(product.getSku()).isEqualTo(SUPER_NEW_SKU);
     }
 
     @Test
-    void updatePrice() {
+    void shouldUpdatePrice() {
+        productRepository.updatePrice(250L, newProduct.getId());
+        Product product = productRepository.getById(newProduct.getId());
+        assertThat(product.getUnitPrice()).isEqualTo(250L);
     }
 
     @Test
-    void changeActive() {
+    void shouldChangeActive() {
+        productRepository.changeActive(false, newProduct.getId());
+        Product product = productRepository.getById(newProduct.getId());
+        assertThat(product.getActive()).isEqualTo(false);
     }
 }
