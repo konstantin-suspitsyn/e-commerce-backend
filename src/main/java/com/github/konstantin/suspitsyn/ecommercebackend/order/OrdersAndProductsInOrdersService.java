@@ -27,7 +27,7 @@ public class OrdersAndProductsInOrdersService {
     public static final String COOKIE_CART_ID_NAME = "cookieCartId";
     public static final String INACTIVE_GOODS = "Товар заказать нельзя. Он неактивный";
     public static final String SHORTAGE = "Товар на складе закончился";
-    public static final String ORDER_CANCELLED_ALREADY = "Заказ был уже удолен";
+    public static final String ORDER_CANCELLED_ALREADY = "Заказ был уже удален";
     private final UserService userService;
     private final ProductService productService;
     public static final int EXPIRED_DAYS_TO_ADD = 10;
@@ -176,7 +176,7 @@ public class OrdersAndProductsInOrdersService {
             productInOrdersService.save(productsInOrder);
         } else {
             productInOrdersService.updateQuantityAndPrice(
-                    productInOrderRequest.getQuantity() + productInOrder.getOrderQuantity(),
+                    quantityForOrder + productInOrder.getOrderQuantity(),
                     productInOrderRequest.getPrice(),
                     productInOrder.getId()
             );
@@ -213,6 +213,13 @@ public class OrdersAndProductsInOrdersService {
 
         this.changeTotalQuantityInOrder(order, -decreaseAmountFinal, price);
 
+        productInOrdersService.updateQuantityAndPrice(PIO.getOrderQuantity() - decreaseAmountFinal,
+                price, PIO.getId());
+
+        productService.updatePcs(product.getUnitsInActiveStock() + decreaseAmountFinal,
+                product.getUnitsInReserve() - decreaseAmountFinal,
+                product.getId());
+
         order = this.createOrFindOrder(request, response);
         if (order.getTotalItems() == 0) {
             this.cancelOrder(order.getId());
@@ -239,6 +246,11 @@ public class OrdersAndProductsInOrdersService {
         orderService.updateSums(order.getTotalItems() + amount,
                 order.getTotalPrice() + price * amount,
                 order.getId());
+    }
+
+    public List<ProductsInOrder> showMyCart(HttpServletRequest request, HttpServletResponse response) {
+        Order order = this.createOrFindOrder(request, response);
+        return orderService.getProductsInOrder(order.getId());
     }
 
 
@@ -288,4 +300,6 @@ public class OrdersAndProductsInOrdersService {
         response.addCookie(theCookie);
         return cookieId;
     }
+
+
 }

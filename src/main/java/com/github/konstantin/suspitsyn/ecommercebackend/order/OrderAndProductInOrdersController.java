@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RequestMapping(path = "orders")
 @RestController
@@ -13,8 +14,8 @@ public class OrderAndProductInOrdersController {
 
     private final OrdersAndProductsInOrdersService ordersAndProductsInOrdersService;
 
-    @GetMapping("/product/add")
-    public void getSession(@RequestBody ProductInOrderRequest productInOrderRequest,
+    @PostMapping("/product/add")
+    public void addProduct(@RequestBody ProductInOrderRequest productInOrderRequest,
                            HttpServletRequest request, HttpServletResponse response) {
         ordersAndProductsInOrdersService.addProductToOrder(productInOrderRequest, request, response);
     }
@@ -35,5 +36,10 @@ public class OrderAndProductInOrdersController {
     @GetMapping("/delete")
     public void cancelOrder(@RequestParam Long order) {
         ordersAndProductsInOrdersService.cancelOrder(order);
+    }
+
+    @GetMapping("/my-cart")
+    public List<ProductsInOrder> showMyCart(HttpServletRequest request, HttpServletResponse response) {
+        return ordersAndProductsInOrdersService.showMyCart(request, response);
     }
 }

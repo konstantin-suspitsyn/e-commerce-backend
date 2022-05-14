@@ -21,3 +21,7 @@ Order, Product in Orders repositories and services created
 - [x] Product in Orders, Orders repositories
 - [x] Product in Orders, Orders CRUD
 - [x] Product in Orders, Orders Controller
+
+## 0.2.1-SNAPSHOT
+- [x] Add README data
+- [x] Fixed some bugs

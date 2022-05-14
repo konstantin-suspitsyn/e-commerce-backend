@@ -1,5 +1,6 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.order;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
