@@ -51,7 +51,8 @@ password: password
 6. Просмотр информации о себе
    http://localhost:8080/users/self <br>
 Ответ:
-```{
+```
+{
     "firstName": "firstName",
     "lastName": "lastName",
     "userRole": "USER",
@@ -63,8 +64,8 @@ password: password
    В POST надо передать JSON:<br>
 ```
 {
-"oldPassword": "password",
-"newPassword": "password1"
+   "oldPassword": "password",
+   "newPassword": "password1"
 }
 ```
 8. Сделать пользователя админом
@@ -91,3 +92,67 @@ http://localhost:8080/users/all
 5. Удаление категории (DELETE)<br>
    Должен быть админом<br>
    http://localhost:8080/product-categories/delete?id=<id>
+
+## Product API
+1. Просмотр товаров<br>
+http://localhost:8080/products (GET)<br>
+Опционально можно передать параметры pageNo perPage<br> http://localhost:8080/products?pageNo=<номер_страницы>&perPage=<кол-во_элемнтов_на_странице> (GET)
+2. Просмотр одного товара<br>
+   http://localhost:8080/products/one?id=<id_товара> (GET)<br>
+3. Поиск товаров<br>
+   http://localhost:8080/products/search?searchName=<name> (GET)
+4. Фильтр по категории<br>
+   http://localhost:8080/products/category?categoryId=<номер_категории> (GET)<br>
+   Опционально можно передать параметры pageNo perPage <br>http://localhost:8080/products/category?categoryId=<номер_категории>&pageNo=<номер_страницы>&perPage=<кол-во_элемнтов_на_странице> (GET)
+5. Создание товара<br>
+http://localhost:8080/products/create (POST)<br>Должен быть админом<br>
+```
+{
+    "sku": "123123",
+    "shortName": "test",
+    "description": "test",
+    "unitPrice": 123500,
+    "imageUrl": "tets.jpg",
+    "active": true,
+    "unitsInActiveStock": 5,
+    "unitsInReserve": 0,
+    "category": 1
+}
+```
+4. Удаление товара<br>http://localhost:8080/products/delete?id=<id_товара> (DELETE)<br>Должен быть админом<br>
+5. Обновлнение мастер-данных товара<br>
+   http://localhost:8080/products/update-data (POST)<br>Должен быть админом<br>
+```
+{   
+    "id": <id_товара>,
+    "sku": "testSKUUpd",
+    "shortName": "testUpd",
+    "description": "testUpd",
+    "imageUrl": "tets_.jpg"
+}
+```
+6. Обновление цены<br>
+   http://localhost:8080/products/update-price?id=<id_товара>&price=<новая_цена> (POST)<br>Должен быть админом<br>
+
+## API корзины
+1. Добавление товара в корзину<br>
+http://localhost:8080/orders/product/add
+```
+{
+    "id":<id_товара>,
+    "price": <цена_товара>,
+    "quantity": <кол-во>
+}
+```
+В этот момет произойдет несколько вещей:
+- Будет создан Cookie cartId, который будет использован наравне с логином (если он есть) при создании или поиске заказа
+- Будет создан или найден заказ по Cookie cartId или имени пользоваля
+- В случае, если пользователь создал корзину под своим логином, затем зашел с другого устройства, не залогинился и создал новую корзину, то после логина, старый заказ передет в статус CANCELLED
+- Кол-во товаров, которые были добавлены в корзину будут перемещены в резерв таблицы с товарами (и уйдут из доступности для заказа)
+2. Просмотр товаров в своей корзине<br>http://localhost:8080/orders/my-cart
+3. Уменьшение кол-ва товара<br>http://localhost:8080/orders/product/decrease?productId=<id_товара>&decreaseAmount=<кол-во_товара> <br>
+При этом, кол-во decreaseAmount уменьшит резерв товара
+4. Удаление товара из корзины кол-ва товара<br>http://localhost:8080/orders/product/delete?productId=<id_товара> <br>
+   При этом, отмененное кол-во уменьшит резерв и увеличит активный сток
+5. Перевод корзины в статус CANCELLED<br>http://localhost:8080/orders/delete?order=<номер_заказа> <br>Должен быть админом<br>
+

@@ -30,7 +30,7 @@ public class ProductService {
                                                    Integer pageNo,
                                                    Integer perPage) {
         Pageable pageable = PageRequest.of(pageNo, perPage);
-        return productRepository.findByShortNameContaining(searchName, pageable);
+        return productRepository.findByShortNameContainingIgnoreCase(searchName, pageable);
     }
 
     public Product createNewProduct(ProductCreateRequest productCreateRequest, HttpServletRequest request) {
@@ -77,5 +77,26 @@ public class ProductService {
 
     public String getPrice(Long id) {
         return String.valueOf(productRepository.getById(id).getUnitPrice());
+    }
+
+    public Product findById(Long id) {
+        return productRepository.getById(id);
+    }
+
+    public void updatePcs(Long activeStock, Long reservedStock, Long id) {
+        productRepository.updatePcs(activeStock, reservedStock, id);
+    }
+
+    public void updateData(ProductUpdateDataRequest productUpdateDataRequest) {
+        productRepository.updateData(productUpdateDataRequest.getSku(),
+                productUpdateDataRequest.getShortName(),
+                productUpdateDataRequest.getDescription(),
+                productUpdateDataRequest.getImageUrl(),
+                LocalDate.now(),
+                productUpdateDataRequest.getId());
+    }
+
+    public void updatePrice(Long id, Long price) {
+        productRepository.updatePrice(price, id);
     }
 }

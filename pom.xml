@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.github.konstantin.suspitsyn</groupId>
 	<artifactId>e-commerce-backend</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.2.1-SNAPSHOT</version>
 	<name>e-commerce-backend</name>
 	<description>Backend e-commerce site</description>
 	<properties>

@@ -60,12 +60,17 @@ public class ProductController {
 
     @PostMapping("/update-data")
     void updateData(@RequestBody ProductUpdateDataRequest productUpdateDataRequest) {
-
+        productService.updateData(productUpdateDataRequest);
     }
 
-    @GetMapping("/id")
-    public String getPrice(@RequestParam Long id) {
-        return productService.getPrice(id);
+    @PostMapping("/update-price")
+    void updatePrice(@RequestParam Long id, @RequestParam Long price) {
+        productService.updatePrice(id, price);
+    }
+
+    @GetMapping("/one")
+    public Product findById(@RequestParam Long id) {
+        return productService.findById(id);
     }
 
 

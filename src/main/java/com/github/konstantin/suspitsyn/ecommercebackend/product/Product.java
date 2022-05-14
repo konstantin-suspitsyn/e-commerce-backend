@@ -1,6 +1,8 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.product;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.konstantin.suspitsyn.ecommercebackend.order.ProductsInOrder;
 import com.github.konstantin.suspitsyn.ecommercebackend.productcategories.ProductCategory;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "product")
@@ -56,6 +59,10 @@ public class Product {
     @JsonBackReference
     @JoinColumn(name = "category_id", nullable = false)
     private ProductCategory category;
+
+    @JsonIgnore
+    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, mappedBy = "product")
+    List<ProductsInOrder> productsInOrderList;
 
     public Product(String sku, String shortName, String description, Long unitPrice, String imageUrl, Boolean active, Long unitsInActiveStock, Long unitsInReserve, LocalDate dateCreated, LocalDate lastUpdated, ProductCategory category) {
         this.sku = sku;
