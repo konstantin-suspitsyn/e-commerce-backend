@@ -166,3 +166,8 @@ http://localhost:8080/orders/product/add
 2. Проверка оплаты<br>
    Поскольку backend висит на localhost и callback из Yookassa не могут передаться, был реализован ручной запуск<br>
    http://localhost:8080/orders/check_payments_manually (GET)<br>Должен быть админом<br>
+
+## Схема БД<br>
+![db_schema](https://github.com/konstantin-suspitsyn/e-commerce-backend/blob/main/src/test/resources/assets/db_schema.png)
+   
+   
