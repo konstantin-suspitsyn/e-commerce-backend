@@ -25,3 +25,6 @@ Order, Product in Orders repositories and services created
 ## 0.2.1-SNAPSHOT
 - [x] Add README data
 - [x] Fixed some bugs
+
+## 0.3.0-SNAPSHOT
+- [x] Added Yookassa as payment method

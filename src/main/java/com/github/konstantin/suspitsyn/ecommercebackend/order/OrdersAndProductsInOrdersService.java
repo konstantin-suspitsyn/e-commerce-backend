@@ -1,5 +1,6 @@
 package com.github.konstantin.suspitsyn.ecommercebackend.order;
 
+import com.github.konstantin.suspitsyn.ecommercebackend.checkout.CheckoutService;
 import com.github.konstantin.suspitsyn.ecommercebackend.product.Product;
 import com.github.konstantin.suspitsyn.ecommercebackend.product.ProductService;
 import com.github.konstantin.suspitsyn.ecommercebackend.user.User;
@@ -28,6 +29,7 @@ public class OrdersAndProductsInOrdersService {
     public static final String INACTIVE_GOODS = "Товар заказать нельзя. Он неактивный";
     public static final String SHORTAGE = "Товар на складе закончился";
     public static final String ORDER_CANCELLED_ALREADY = "Заказ был уже удален";
+    public static final String EMPTY_CART = "Корзина пустая";
     private final UserService userService;
     private final ProductService productService;
     public static final int EXPIRED_DAYS_TO_ADD = 10;
@@ -36,6 +38,7 @@ public class OrdersAndProductsInOrdersService {
 
     private final ProductInOrdersService productInOrdersService;
     private final OrderService orderService;
+    private final CheckoutService checkoutService;
 
     // Orders
 
@@ -61,14 +64,13 @@ public class OrdersAndProductsInOrdersService {
     }
 
 
-
-    public void updateCancelOrderAnd (Order order) {
+    public void updateCancelOrderAnd(Order order) {
 
         this.cancelOrder(order.getId());
 
         List<ProductsInOrder> productsInOrderList = productInOrdersService.getAllByOrder(order);
 
-        for(ProductsInOrder tempPIO: productsInOrderList) {
+        for (ProductsInOrder tempPIO : productsInOrderList) {
             Product product = tempPIO.getProduct();
             productService.updatePcs(
                     product.getUnitsInActiveStock() + tempPIO.getOrderQuantity(),
@@ -124,7 +126,7 @@ public class OrdersAndProductsInOrdersService {
 
         List<ProductsInOrder> productsInOrderList = productInOrdersService.getAllByOrder(order);
 
-        for(ProductsInOrder tempPIO: productsInOrderList) {
+        for (ProductsInOrder tempPIO : productsInOrderList) {
             Product product = tempPIO.getProduct();
             productService.updatePcs(
                     product.getUnitsInActiveStock() + tempPIO.getOrderQuantity(),
@@ -166,7 +168,7 @@ public class OrdersAndProductsInOrdersService {
                 .getProductInOrder(order, productToAdd);
 
         if (productInOrder == null) {
-            ProductsInOrder productsInOrder = new ProductsInOrder (
+            ProductsInOrder productsInOrder = new ProductsInOrder(
                     productToAdd,
                     order,
                     quantityForOrder,
@@ -253,6 +255,38 @@ public class OrdersAndProductsInOrdersService {
         return orderService.getProductsInOrder(order.getId());
     }
 
+    public String pay(HttpServletRequest request, HttpServletResponse response) {
+        Order order = this.createOrFindOrder(request, response);
+
+        if (order.getTotalPrice() == 0) {
+            throw new IllegalStateException(EMPTY_CART);
+        }
+
+        Map<String, String> paymentJson = checkoutService.sendPaymentYookassa(order.getId(), order.getTotalPrice());
+
+        orderService.updateStatus(OrderStatus.NOT_PAID, order.getId());
+        orderService.updatePaymentId(paymentJson.get("id"), order.getId());
+
+        return paymentJson.get("confirmation_url");
+
+    }
+
+    public void checkAllPaymentsManually(HttpServletRequest request, HttpServletResponse response) {
+        List<Order> orderList = orderService.findOrderByStatus(OrderStatus.NOT_PAID);
+
+        if (orderList.isEmpty()) {
+            return;
+        }
+
+        for (Order tempOrder: orderList) {
+            Map<String, String> paymentJson = checkoutService.checkPaymentStatusYookassa(tempOrder.getPaymentId());
+
+            if (paymentJson.get("status").equals("succeeded")) {
+                orderService.updateStatus(OrderStatus.PAID, tempOrder.getId());
+            }
+        }
+    }
+
 
     // HELPER METHODS
     private Map<String, String> createSessionIfNoSessionOrUsername(HttpServletRequest request, HttpServletResponse response) {
@@ -265,7 +299,7 @@ public class OrdersAndProductsInOrdersService {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
+            username = ((UserDetails) principal).getUsername();
         } else {
             username = principal.toString();
         }
@@ -275,7 +309,7 @@ public class OrdersAndProductsInOrdersService {
 
         // If there are some cookies
         if (cookies != null) {
-            for(Cookie tempCookie: cookies) {
+            for (Cookie tempCookie : cookies) {
                 if (tempCookie.getName().equals(CART_COOKIE)) {
                     cookieId = tempCookie.getValue();
                 }
@@ -283,7 +317,7 @@ public class OrdersAndProductsInOrdersService {
         }
 
         // If cart cookie was not found
-        if (cookieId==null) {
+        if (cookieId == null) {
             cookieId = setCookie(response);
         }
 
@@ -303,3 +337,4 @@ public class OrdersAndProductsInOrdersService {
 
 
 }
+
