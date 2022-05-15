@@ -155,6 +155,7 @@ http://localhost:8080/orders/product/add
 4. Удаление товара из корзины кол-ва товара<br>http://localhost:8080/orders/product/delete?productId=<id_товара> <br>
    При этом, отмененное кол-во уменьшит резерв и увеличит активный сток
 5. Перевод корзины в статус CANCELLED<br>http://localhost:8080/orders/delete?order=<номер_заказа> <br>Должен быть админом<br>
+6. Закрыть заказ (перевод в статус FINISHED)<br>http://localhost:8080/orders/complete_order?orderId=<номер_заказа> <br>Должен быть админом<br>
 
 ## API оплаты
 1. Оплата<br>
