@@ -53,4 +53,9 @@ public class OrderAndProductInOrdersController {
         ordersAndProductsInOrdersService.checkAllPaymentsManually(request, response);
     }
 
+    @PostMapping("/complete_order")
+    public void completeOrder(@RequestParam Long orderId) {
+        ordersAndProductsInOrdersService.completeOrder(orderId);
+    }
+
 }

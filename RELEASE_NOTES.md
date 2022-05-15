@@ -28,3 +28,6 @@ Order, Product in Orders repositories and services created
 
 ## 0.3.0-SNAPSHOT
 - [x] Added Yookassa as payment method
+
+## 0.4.0
+- [x] Added admin status to finish order

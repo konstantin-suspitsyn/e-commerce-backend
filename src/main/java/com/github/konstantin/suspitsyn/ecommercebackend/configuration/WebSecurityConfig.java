@@ -43,6 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(HttpMethod.GET,"/orders/delete/**").hasAnyAuthority(UserRole.ADMIN.name());
         http.authorizeRequests().antMatchers(HttpMethod.GET,"/orders/pay/**").authenticated();
         http.authorizeRequests().antMatchers(HttpMethod.GET,"/orders/check_payments_manually/**").hasAnyAuthority(UserRole.ADMIN.name());
+        http.authorizeRequests().antMatchers(HttpMethod.GET,"/orders/complete_order/**").hasAnyAuthority(UserRole.ADMIN.name());
         http.authorizeRequests().anyRequest().permitAll();
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.sessionManagement( ).maximumSessions(1).maxSessionsPreventsLogin(false);

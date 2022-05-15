@@ -287,6 +287,10 @@ public class OrdersAndProductsInOrdersService {
         }
     }
 
+    public void completeOrder(Long orderId) {
+        orderService.updateStatus(OrderStatus.FINISHED, orderId);
+    }
+
 
     // HELPER METHODS
     private Map<String, String> createSessionIfNoSessionOrUsername(HttpServletRequest request, HttpServletResponse response) {
@@ -334,7 +338,5 @@ public class OrdersAndProductsInOrdersService {
         response.addCookie(theCookie);
         return cookieId;
     }
-
-
 }
 
