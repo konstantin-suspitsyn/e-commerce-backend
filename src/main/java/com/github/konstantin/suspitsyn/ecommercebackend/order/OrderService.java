@@ -2,6 +2,7 @@ package com.github.konstantin.suspitsyn.ecommercebackend.order;
 
 import com.github.konstantin.suspitsyn.ecommercebackend.user.User;
 import lombok.AllArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -44,6 +45,14 @@ public class OrderService {
 
     public void updateStatus(OrderStatus orderStatus, Long id) {
         orderRepository.updateStatus(orderStatus, id);
+    }
+
+    public List<Order> findOrderByStatus(OrderStatus orderStatus) {
+        return orderRepository.findOrderByStatus(orderStatus);
+    }
+
+    public void updatePaymentId(String paymentId, Long orderId) {
+        orderRepository.updatePaymentId(paymentId, orderId);
     }
 
 }

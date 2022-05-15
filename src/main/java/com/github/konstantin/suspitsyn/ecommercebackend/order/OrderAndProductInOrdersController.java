@@ -42,4 +42,15 @@ public class OrderAndProductInOrdersController {
     public List<ProductsInOrder> showMyCart(HttpServletRequest request, HttpServletResponse response) {
         return ordersAndProductsInOrdersService.showMyCart(request, response);
     }
+
+    @GetMapping("/pay")
+    public String pay(HttpServletRequest request, HttpServletResponse response) {
+        return ordersAndProductsInOrdersService.pay(request, response);
+    }
+
+    @GetMapping("/check_payments_manually")
+    public void checkAllPaymentsManually(HttpServletRequest request, HttpServletResponse response) {
+        ordersAndProductsInOrdersService.checkAllPaymentsManually(request, response);
+    }
+
 }

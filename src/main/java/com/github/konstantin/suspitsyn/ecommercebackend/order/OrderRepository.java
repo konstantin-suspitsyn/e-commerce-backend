@@ -54,11 +54,21 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "WHERE o.id = ?2"))
     void updateUser(User user, Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Transactional
     @Query("SELECT o.productsInOrderList " +
             "FROM Order o " +
             "WHERE o.id = ?1")
     List<ProductsInOrder> getProductsInOrder(Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE Order o " +
+            "SET o.paymentId = ?1 " +
+            "WHERE o.id = ?2")
+    void updatePaymentId(String paymentId, Long id);
+
+    @Query("SELECT o " +
+            "FROM Order o " +
+            "WHERE o.orderStatus = ?1")
+    List<Order> findOrderByStatus(OrderStatus orderStatus);
 
 }

@@ -156,3 +156,12 @@ http://localhost:8080/orders/product/add
    При этом, отмененное кол-во уменьшит резерв и увеличит активный сток
 5. Перевод корзины в статус CANCELLED<br>http://localhost:8080/orders/delete?order=<номер_заказа> <br>Должен быть админом<br>
 
+## API оплаты
+1. Оплата<br>
+   http://localhost:8080/orders/pay (GET)<br>
+   Дожен быть авторизированным<br>
+   Вернется ссылка для редиректа на сайт Yookassa<br>
+   Логин-пароль от тестового магазина сохранены
+2. Проверка оплаты<br>
+   Поскольку backend висит на localhost и callback из Yookassa не могут передаться, был реализован ручной запуск<br>
+   http://localhost:8080/orders/check_payments_manually (GET)<br>Должен быть админом<br>

@@ -31,6 +31,8 @@ public class Order {
     private LocalDateTime updateDate;
     @OneToMany(mappedBy = "order")
     List<ProductsInOrder> productsInOrderList;
+    @JsonIgnore
+    private String paymentId;
 
     public Order(User user,
                  String session,
